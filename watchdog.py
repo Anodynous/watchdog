@@ -105,9 +105,9 @@ def scrape_petrescue():
 
 def doggoram_kulkurit(data):
     bot = telepot.Bot(telegram_token)
-    image = urlopen(str(data[0][2]))
     message = data[0][0] + ' ' + data[0][3]
     for user in telegram_subs:
+        image = urlopen(str(data[0][2]))  # Need to redownload image before each time it is sent as I don't store it anywhere otherwise it will fail on second user
         bot.sendMessage(user, str(message))
         bot.sendPhoto(user, ('image.jpg', image))
 
