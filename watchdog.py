@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from pandas import DataFrame
 import telepot
-from urllib.request import urlopen  # Needed to get image to send using telepot. Couldn't get requests to work right
+import shutil
 
 # Import config file
 config = configparser.ConfigParser()
@@ -106,10 +106,15 @@ def scrape_petrescue():
 def doggoram_kulkurit(data):
     bot = telepot.Bot(telegram_token)
     message = data[0][0] + ' ' + data[0][3]
-    for user in telegram_subs:
-        image = urlopen(str(data[0][2]))  # Need to redownload image before each time it is sent as I don't store it anywhere otherwise it will fail on second user
+    r = requests.get(str(data[0][2]), stream=True)  # Download image of dog
+    if r.status_code == 200:
+        with open('image.jpg', 'wb') as f:
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw, f)
+    for user in telegram_subs:  # Send message and image to all subscribed users
         bot.sendMessage(user, str(message))
-        bot.sendPhoto(user, ('image.jpg', image))
+        image = open('image.jpg', 'rb')  # Open the downloaded image
+        bot.sendPhoto(user, image, caption=data[0][0], disable_notification=True)
 
 
 def doggoram_viipuri(data):
